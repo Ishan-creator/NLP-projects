@@ -1,35 +1,29 @@
-from langchain_community.llms import Ollama
-from IPython.display import HTML, display
-from PIL import Image, ImageGrab
-from io import BytesIO
-import base64
-import cv2
+import speech_recognition as sr
 
-llava = Ollama(model="llava-phi3")
-
-def convert_to_base64(pil_image):
-    buffered = BytesIO()
-    pil_image.save(buffered, format="JPEG")
-    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-    return img_str
-
-def plt_img_base64(img_base64):
-    image_html = f'<img src="data:image/jpeg;base64,{img_base64}" />'
-    display(HTML(image_html))
-
-def img_process(file_path):
-    pil_image = Image.open(file_path)
-    pil_image = pil_image.convert('RGB')
-    image_b64 = convert_to_base64(pil_image)
-    plt_img_base64(image_b64)
-    return image_b64
+recognizer = sr.Recognizer()
 
 
-class image():
-    def chat_with_image(question, image_path):
-        image_b64 = img_process(image_path)
-        llm_with_image_context = llava.bind(images=[image_b64])
-        return llm_with_image_context.invoke(question)[0]
+class input():
+    def speech_to_text():
+        with sr.Microphone() as source:
+            print("Adjusting for ambient noise, please wait...")
+            recognizer.adjust_for_ambient_noise(source)
+            print("Listening...")
+            audio = recognizer.listen(source)
+            print("okayy")
+
+            try:
+                print("Recognizing...")
+                text = recognizer.recognize_google(audio)
+                print(text)
+            except sr.UnknownValueError:
+                print("Sorry, I could not understand the audio.")
+            except sr.RequestError as e:
+                print("Could not request results; {0}".format(e))
+                
+        return text
     
-check = image.chat_with_image("Explain the image" , "/home/ishan-pc/Desktop/Ishan-Github/NLP-projects/helper/modules/images.jpeg")
+
+
+
 
